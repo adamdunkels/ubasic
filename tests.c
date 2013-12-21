@@ -38,15 +38,24 @@ static const char program_loop[] =
 "10 for i = 0 to 126\n\
 20 for j = 0 to 126\n\
 30 for k = 0 to 10\n\
-37 let a = i * j * k\n\
-40 next k\n\
-50 next j\n\
-60 next i\n\
-70 end\n";
+40 let a = i * j * k\n\
+50 next k\n\
+60 next j\n\
+70 next i\n\
+80 end\n";
 
 static const char program_let[] =
 "10 let a = 42\n\
 20 end\n";
+
+static const char program_fibs[] =
+"20 let a = 1\n\
+40 let b = 1\n\
+60 for i = 0 to 8\n\
+80 let b = a + b\n\
+100 let a = b - a\n\
+140 next i\n\
+160 end\n";
 
 
 /*---------------------------------------------------------------------------*/
@@ -70,7 +79,7 @@ void run(const char program[]) {
   end_t = clock();
   delta_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
 
-  printf("done. Run time: %.3f\n", delta_t);
+  printf("done. Run time: %.3f s\n", delta_t);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -79,8 +88,12 @@ main(void)
 {
   run(program_let);
   assert(ubasic_get_variable(0) == 42);
+
   run(program_loop);
   assert(ubasic_get_variable(0) == (VARIABLE_TYPE)(126 * 126 * 10));
+
+  run(program_fibs);
+  assert(ubasic_get_variable(1) == 89);
 
   return 0;
 }

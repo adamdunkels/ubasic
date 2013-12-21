@@ -30,13 +30,13 @@
 #ifndef __UBASIC_H__
 #define __UBASIC_H__
 
-#define VARIABLE_TYPE char
+#include "vartype.h"
 
 void ubasic_init(const char *program);
 void ubasic_run(void);
 int ubasic_finished(void);
 
-int ubasic_get_variable(int varnum);
-void ubasic_set_variable(int varum, int value);
+VARIABLE_TYPE ubasic_get_variable(int varnum);
+void ubasic_set_variable(int varum, VARIABLE_TYPE value);
 
 #endif /* __UBASIC_H__ */

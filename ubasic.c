@@ -64,7 +64,7 @@ static VARIABLE_TYPE variables[MAX_VARNUM];
 
 static int ended;
 
-static int expr(void);
+static VARIABLE_TYPE expr(void);
 static void line_statement(void);
 static void statement(void);
 /*---------------------------------------------------------------------------*/
@@ -156,7 +156,7 @@ term(void)
   return f1;
 }
 /*---------------------------------------------------------------------------*/
-static int
+static VARIABLE_TYPE
 expr(void)
 {
   int t1, t2;
@@ -479,14 +479,14 @@ ubasic_finished(void)
 }
 /*---------------------------------------------------------------------------*/
 void
-ubasic_set_variable(int varnum, int value)
+ubasic_set_variable(int varnum, VARIABLE_TYPE value)
 {
   if(varnum >= 0 && varnum <= MAX_VARNUM) {
     variables[varnum] = value;
   }
 }
 /*---------------------------------------------------------------------------*/
-int
+VARIABLE_TYPE
 ubasic_get_variable(int varnum)
 {
   if(varnum >= 0 && varnum <= MAX_VARNUM) {

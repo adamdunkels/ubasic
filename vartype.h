@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006, Adam Dunkels
+ * Copyright (c) 2013, Danyil Bohdan
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,55 +28,9 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef __TOKENIZER_H__
-#define __TOKENIZER_H__
+#ifndef __VARTYPE_H__
+#define __VARTYPE_H__
 
-#include "vartype.h"
+#define VARIABLE_TYPE char
 
-enum {
-  TOKENIZER_ERROR,
-  TOKENIZER_ENDOFINPUT,
-  TOKENIZER_NUMBER,
-  TOKENIZER_STRING,
-  TOKENIZER_VARIABLE,
-  TOKENIZER_LET,
-  TOKENIZER_PRINT,
-  TOKENIZER_IF,
-  TOKENIZER_THEN,
-  TOKENIZER_ELSE,
-  TOKENIZER_FOR,
-  TOKENIZER_TO,
-  TOKENIZER_NEXT,
-  TOKENIZER_GOTO,
-  TOKENIZER_GOSUB,
-  TOKENIZER_RETURN,
-  TOKENIZER_CALL,
-  TOKENIZER_END,
-  TOKENIZER_COMMA,
-  TOKENIZER_SEMICOLON,
-  TOKENIZER_PLUS,
-  TOKENIZER_MINUS,
-  TOKENIZER_AND,
-  TOKENIZER_OR,
-  TOKENIZER_ASTR,
-  TOKENIZER_SLASH,
-  TOKENIZER_MOD,
-  TOKENIZER_LEFTPAREN,
-  TOKENIZER_RIGHTPAREN,
-  TOKENIZER_LT,
-  TOKENIZER_GT,
-  TOKENIZER_EQ,
-  TOKENIZER_CR,
-};
-
-void tokenizer_init(const char *program);
-void tokenizer_next(void);
-int tokenizer_token(void);
-VARIABLE_TYPE tokenizer_num(void);
-int tokenizer_variable_num(void);
-void tokenizer_string(char *dest, int len);
-
-int tokenizer_finished(void);
-void tokenizer_error_print(void);
-
-#endif /* __TOKENIZER_H__ */
+#endif /* __VARTYPE_H__ */

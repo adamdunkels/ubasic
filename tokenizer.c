@@ -43,7 +43,7 @@
 
 static char const *ptr, *nextptr;
 
-#define MAX_NUMLEN 5
+#define MAX_NUMLEN 6
 
 struct keyword_token {
   char *keyword;
@@ -118,21 +118,21 @@ get_next_token(void)
   if(*ptr == 0) {
     return TOKENIZER_ENDOFINPUT;
   }
-  
+
   if(isdigit(*ptr)) {
     for(i = 0; i < MAX_NUMLEN; ++i) {
       if(!isdigit(ptr[i])) {
-	if(i > 0) {
-	  nextptr = ptr + i;
-	  return TOKENIZER_NUMBER;
-	} else {
-	  DEBUG_PRINTF("get_next_token: error due to too short number\n");
-	  return TOKENIZER_ERROR;
-	}
+        if(i > 0) {
+          nextptr = ptr + i;
+          return TOKENIZER_NUMBER;
+        } else {
+          DEBUG_PRINTF("get_next_token: error due to too short number\n");
+          return TOKENIZER_ERROR;
+        }
       }
       if(!isdigit(ptr[i])) {
-	DEBUG_PRINTF("get_next_token: error due to malformed number\n");
-	return TOKENIZER_ERROR;
+        DEBUG_PRINTF("get_next_token: error due to malformed number\n");
+        return TOKENIZER_ERROR;
       }
     }
     DEBUG_PRINTF("get_next_token: error due to too long number\n");
@@ -150,8 +150,8 @@ get_next_token(void)
   } else {
     for(kt = keywords; kt->keyword != NULL; ++kt) {
       if(strncmp(ptr, kt->keyword, strlen(kt->keyword)) == 0) {
-	nextptr = ptr + strlen(kt->keyword);
-	return kt->token;
+        nextptr = ptr + strlen(kt->keyword);
+        return kt->token;
       }
     }
   }
@@ -161,7 +161,7 @@ get_next_token(void)
     return TOKENIZER_VARIABLE;
   }
 
-  
+
   return TOKENIZER_ERROR;
 }
 /*---------------------------------------------------------------------------*/
@@ -196,7 +196,7 @@ tokenizer_next(void)
   return;
 }
 /*---------------------------------------------------------------------------*/
-int
+VARIABLE_TYPE
 tokenizer_num(void)
 {
   return atoi(ptr);
@@ -207,7 +207,7 @@ tokenizer_string(char *dest, int len)
 {
   char *string_end;
   int string_len;
-  
+
   if(tokenizer_token() != TOKENIZER_STRING) {
     return;
   }
