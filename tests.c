@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006, Adam Dunkels
+ * Copyright (c) 2013, Danyil Bohdan
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,16 +28,60 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef __UBASIC_H__
-#define __UBASIC_H__
 
-#define VARIABLE_TYPE char
+#include <time.h>
+#include <stdio.h>
+#include <assert.h>
+#include "ubasic.h"
 
-void ubasic_init(const char *program);
-void ubasic_run(void);
-int ubasic_finished(void);
+static const char program_loop[] =
+"10 for i = 0 to 126\n\
+20 for j = 0 to 126\n\
+30 for k = 0 to 10\n\
+37 let a = i * j * k\n\
+40 next k\n\
+50 next j\n\
+60 next i\n\
+70 end\n";
 
-int ubasic_get_variable(int varnum);
-void ubasic_set_variable(int varum, int value);
+static const char program_let[] =
+"10 let a = 42\n\
+20 end\n";
 
-#endif /* __UBASIC_H__ */
+
+/*---------------------------------------------------------------------------*/
+void run(const char program[]) {
+  static int test_num = 0;
+  test_num++;
+  printf("Running test #%u... ", test_num);
+  fflush(stdout);
+
+  clock_t start_t, end_t;
+  double delta_t;
+
+  start_t = clock();
+
+  ubasic_init(program);
+
+  do {
+    ubasic_run();
+  } while(!ubasic_finished());
+
+  end_t = clock();
+  delta_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+
+  printf("done. Run time: %.3f\n", delta_t);
+}
+
+/*---------------------------------------------------------------------------*/
+int
+main(void)
+{
+  run(program_let);
+  assert(ubasic_get_variable(0) == 42);
+  run(program_loop);
+  assert(ubasic_get_variable(0) == (VARIABLE_TYPE)(126 * 126 * 10));
+
+  return 0;
+}
+/*---------------------------------------------------------------------------*/

@@ -36,7 +36,6 @@
 #define DEBUG_PRINTF(...)
 #endif
 
-
 #include "ubasic.h"
 #include "tokenizer.h"
 
@@ -61,7 +60,7 @@ static struct for_state for_stack[MAX_FOR_STACK_DEPTH];
 static int for_stack_ptr;
 
 #define MAX_VARNUM 26
-static char variables[MAX_VARNUM];
+static VARIABLE_TYPE variables[MAX_VARNUM];
 
 static int ended;
 
@@ -83,7 +82,7 @@ accept(int token)
 {
   if(token != tokenizer_token()) {
     DEBUG_PRINTF("Token not what was expected (expected %d, got %d)\n",
-		 token, tokenizer_token());
+                token, tokenizer_token());
     tokenizer_error_print();
     exit(1);
   }
@@ -135,8 +134,8 @@ term(void)
   op = tokenizer_token();
   DEBUG_PRINTF("term: token %d\n", op);
   while(op == TOKENIZER_ASTR ||
-	op == TOKENIZER_SLASH ||
-	op == TOKENIZER_MOD) {
+       op == TOKENIZER_SLASH ||
+       op == TOKENIZER_MOD) {
     tokenizer_next();
     f2 = factor();
     DEBUG_PRINTF("term: %d %d %d\n", f1, op, f2);
@@ -162,14 +161,14 @@ expr(void)
 {
   int t1, t2;
   int op;
-  
+
   t1 = term();
   op = tokenizer_token();
   DEBUG_PRINTF("expr: token %d\n", op);
   while(op == TOKENIZER_PLUS ||
-	op == TOKENIZER_MINUS ||
-	op == TOKENIZER_AND ||
-	op == TOKENIZER_OR) {
+       op == TOKENIZER_MINUS ||
+       op == TOKENIZER_AND ||
+       op == TOKENIZER_OR) {
     tokenizer_next();
     t2 = term();
     DEBUG_PRINTF("expr: %d %d %d\n", t1, op, t2);
@@ -198,13 +197,13 @@ relation(void)
 {
   int r1, r2;
   int op;
-  
+
   r1 = expr();
   op = tokenizer_token();
   DEBUG_PRINTF("relation: token %d\n", op);
   while(op == TOKENIZER_LT ||
-	op == TOKENIZER_GT ||
-	op == TOKENIZER_EQ) {
+       op == TOKENIZER_GT ||
+       op == TOKENIZER_EQ) {
     tokenizer_next();
     r2 = expr();
     DEBUG_PRINTF("relation: %d %d %d\n", r1, op, r2);
@@ -231,11 +230,11 @@ jump_linenum(int linenum)
   while(tokenizer_num() != linenum) {
     do {
       do {
-	tokenizer_next();
+        tokenizer_next();
       } while(tokenizer_token() != TOKENIZER_CR &&
-	      tokenizer_token() != TOKENIZER_ENDOFINPUT);
+          tokenizer_token() != TOKENIZER_ENDOFINPUT);
       if(tokenizer_token() == TOKENIZER_CR) {
-	tokenizer_next();
+        tokenizer_next();
       }
     } while(tokenizer_token() != TOKENIZER_NUMBER);
     DEBUG_PRINTF("jump_linenum: Found line %d\n", tokenizer_num());
@@ -265,13 +264,13 @@ print_statement(void)
     } else if(tokenizer_token() == TOKENIZER_SEMICOLON) {
       tokenizer_next();
     } else if(tokenizer_token() == TOKENIZER_VARIABLE ||
-	      tokenizer_token() == TOKENIZER_NUMBER) {
+          tokenizer_token() == TOKENIZER_NUMBER) {
       printf("%d", expr());
     } else {
       break;
     }
   } while(tokenizer_token() != TOKENIZER_CR &&
-	  tokenizer_token() != TOKENIZER_ENDOFINPUT);
+      tokenizer_token() != TOKENIZER_ENDOFINPUT);
   printf("\n");
   DEBUG_PRINTF("End of print\n");
   tokenizer_next();
@@ -281,7 +280,7 @@ static void
 if_statement(void)
 {
   int r;
-  
+
   accept(TOKENIZER_IF);
 
   r = relation();
@@ -293,8 +292,8 @@ if_statement(void)
     do {
       tokenizer_next();
     } while(tokenizer_token() != TOKENIZER_ELSE &&
-	    tokenizer_token() != TOKENIZER_CR &&
-	    tokenizer_token() != TOKENIZER_ENDOFINPUT);
+        tokenizer_token() != TOKENIZER_CR &&
+        tokenizer_token() != TOKENIZER_ENDOFINPUT);
     if(tokenizer_token() == TOKENIZER_ELSE) {
       tokenizer_next();
       statement();
@@ -352,14 +351,14 @@ static void
 next_statement(void)
 {
   int var;
-  
+
   accept(TOKENIZER_NEXT);
   var = tokenizer_variable_num();
   accept(TOKENIZER_VARIABLE);
   if(for_stack_ptr > 0 &&
      var == for_stack[for_stack_ptr - 1].for_variable) {
     ubasic_set_variable(var,
-			ubasic_get_variable(var) + 1);
+                       ubasic_get_variable(var) + 1);
     if(ubasic_get_variable(var) <= for_stack[for_stack_ptr - 1].to) {
       jump_linenum(for_stack[for_stack_ptr - 1].line_after_for);
     } else {
@@ -377,7 +376,7 @@ static void
 for_statement(void)
 {
   int for_variable, to;
-  
+
   accept(TOKENIZER_FOR);
   for_variable = tokenizer_variable_num();
   accept(TOKENIZER_VARIABLE);
@@ -392,9 +391,9 @@ for_statement(void)
     for_stack[for_stack_ptr].for_variable = for_variable;
     for_stack[for_stack_ptr].to = to;
     DEBUG_PRINTF("for_statement: new for, var %d to %d\n",
-		 for_stack[for_stack_ptr].for_variable,
-		 for_stack[for_stack_ptr].to);
-		 
+                for_stack[for_stack_ptr].for_variable,
+                for_stack[for_stack_ptr].to);
+
     for_stack_ptr++;
   } else {
     DEBUG_PRINTF("for_statement: for stack depth exceeded\n");
@@ -412,9 +411,9 @@ static void
 statement(void)
 {
   int token;
-  
+
   token = tokenizer_token();
-  
+
   switch(token) {
   case TOKENIZER_PRINT:
     print_statement();
@@ -482,7 +481,7 @@ ubasic_finished(void)
 void
 ubasic_set_variable(int varnum, int value)
 {
-  if(varnum > 0 && varnum <= MAX_VARNUM) {
+  if(varnum >= 0 && varnum <= MAX_VARNUM) {
     variables[varnum] = value;
   }
 }
@@ -490,7 +489,7 @@ ubasic_set_variable(int varnum, int value)
 int
 ubasic_get_variable(int varnum)
 {
-  if(varnum > 0 && varnum <= MAX_VARNUM) {
+  if(varnum >= 0 && varnum <= MAX_VARNUM) {
     return variables[varnum];
   }
   return 0;
