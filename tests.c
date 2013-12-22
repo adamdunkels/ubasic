@@ -34,6 +34,10 @@
 #include <assert.h>
 #include "ubasic.h"
 
+static const char program_let[] =
+"10 let a = 42\n\
+20 end\n";
+
 static const char program_loop[] =
 "10 for i = 0 to 126\n\
 20 for j = 0 to 126\n\
@@ -44,16 +48,13 @@ static const char program_loop[] =
 70 next i\n\
 80 end\n";
 
-static const char program_let[] =
-"10 let a = 42\n\
-20 end\n";
-
 static const char program_fibs[] =
 "20 let a = 1\n\
 40 let b = 1\n\
 60 for i = 0 to 8\n\
 80 let b = a + b\n\
 100 let a = b - a\n\
+rem 120 print a, b\n\
 140 next i\n\
 160 end\n";
 

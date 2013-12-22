@@ -65,6 +65,7 @@ static const struct keyword_token keywords[] = {
   {"gosub", TOKENIZER_GOSUB},
   {"return", TOKENIZER_RETURN},
   {"call", TOKENIZER_CALL},
+  {"rem", TOKENIZER_REM},
   {"end", TOKENIZER_END},
   {NULL, TOKENIZER_ERROR}
 };
@@ -188,10 +189,22 @@ tokenizer_next(void)
 
   DEBUG_PRINTF("tokenizer_next: %p\n", nextptr);
   ptr = nextptr;
+
   while(*ptr == ' ') {
     ++ptr;
   }
   current_token = get_next_token();
+
+  if (current_token == TOKENIZER_REM) {
+      while(!(*nextptr == '\n' || tokenizer_finished())) {
+        ++nextptr;
+      }
+      if (*nextptr == '\n') {
+        ++nextptr;
+      }
+      tokenizer_next();
+  }
+
   DEBUG_PRINTF("tokenizer_next: '%s' %d\n", ptr, current_token);
   return;
 }
