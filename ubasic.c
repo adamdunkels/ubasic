@@ -59,6 +59,14 @@ struct for_state {
 static struct for_state for_stack[MAX_FOR_STACK_DEPTH];
 static int for_stack_ptr;
 
+struct line_index {
+  int line_number;
+  char const *program_text_position;
+  struct line_index *next;
+};
+struct line_index *line_index_head = NULL;
+struct line_index *line_index_current = NULL;
+
 #define MAX_VARNUM 26
 static VARIABLE_TYPE variables[MAX_VARNUM];
 
@@ -67,12 +75,14 @@ static int ended;
 static VARIABLE_TYPE expr(void);
 static void line_statement(void);
 static void statement(void);
+static void index_free(void);
 /*---------------------------------------------------------------------------*/
 void
 ubasic_init(const char *program)
 {
   program_ptr = program;
   for_stack_ptr = gosub_stack_ptr = 0;
+  index_free();
   tokenizer_init(program);
   ended = 0;
 }
@@ -224,7 +234,74 @@ relation(void)
 }
 /*---------------------------------------------------------------------------*/
 static void
-jump_linenum(int linenum)
+index_free(void) {
+  if (line_index_head != NULL) {
+    line_index_current = line_index_head;
+    do {
+      DEBUG_PRINTF("Freeing index for line %d.\n", line_index_current);
+      line_index_head = line_index_current;
+      line_index_current = line_index_current->next;
+      free(line_index_head);
+    } while (line_index_current != NULL);
+    line_index_head = NULL;
+  }
+}
+/*---------------------------------------------------------------------------*/
+static char const*
+index_find(int linenum) {
+  struct line_index *lidx;
+  lidx = line_index_head;
+
+  #if DEBUG
+  int step = 0;
+  #endif
+
+  while(lidx != NULL && lidx->line_number != linenum) {
+    lidx = lidx->next;
+
+    #if DEBUG
+    if (lidx != NULL) {
+      DEBUG_PRINTF("index_find: Step %3d. Found index for line %d: %d.\n",
+                   step, lidx->line_number,
+                   lidx->program_text_position);
+    }
+    step++;
+    #endif
+  }
+  if (lidx != NULL && lidx->line_number == linenum) {
+    DEBUG_PRINTF("index_find: Returning index for line %d.\n", linenum);
+    return lidx->program_text_position;
+  }
+  DEBUG_PRINTF("index_find: Returning NULL.\n", linenum);
+  return NULL;
+}
+/*---------------------------------------------------------------------------*/
+static void
+index_add(int linenum, char const* sourcepos) {
+  if (line_index_head != NULL && index_find(linenum)) {
+    return;
+  }
+
+  struct line_index *new_lidx;
+
+  new_lidx = malloc(sizeof(struct line_index));
+  new_lidx->line_number = linenum;
+  new_lidx->program_text_position = sourcepos;
+  new_lidx->next = NULL;
+
+  if (line_index_head != NULL) {
+    line_index_current->next = new_lidx;
+    line_index_current = line_index_current->next;
+  } else {
+    line_index_current = new_lidx;
+    line_index_head = line_index_current;
+  }
+  DEBUG_PRINTF("index_add: Adding index for line %d: %d.\n", linenum,
+               sourcepos);
+}
+/*---------------------------------------------------------------------------*/
+static void
+jump_linenum_slow(int linenum)
 {
   tokenizer_init(program_ptr);
   while(tokenizer_num() != linenum) {
@@ -237,7 +314,21 @@ jump_linenum(int linenum)
         tokenizer_next();
       }
     } while(tokenizer_token() != TOKENIZER_NUMBER);
-    DEBUG_PRINTF("jump_linenum: Found line %d\n", tokenizer_num());
+    DEBUG_PRINTF("jump_linenum_slow: Found line %d\n", tokenizer_num());
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
+jump_linenum(int linenum)
+{
+  char const* pos = index_find(linenum);
+  if (pos != NULL) {
+    DEBUG_PRINTF("jump_linenum: Going to line %d.\n", linenum);
+    tokenizer_goto(pos);
+  } else {
+    /* We'll try to find a yet-unindexed line to jump to. */
+    DEBUG_PRINTF("jump_linenum: Calling jump_linenum_slow.\n", linenum);
+    jump_linenum_slow(linenum);
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -455,7 +546,7 @@ static void
 line_statement(void)
 {
   DEBUG_PRINTF("----------- Line number %d ---------\n", tokenizer_num());
-  /*    current_linenum = tokenizer_num();*/
+  index_add(tokenizer_num(), tokenizer_pos());
   accept(TOKENIZER_NUMBER);
   statement();
   return;

@@ -38,11 +38,21 @@ static const char program_let[] =
 "10 let a = 42\n\
 20 end\n";
 
+static const char program_goto[] =
+"10 goto 50\n\
+20 goto 40\n\
+30 goto 60\n\
+40 goto 30\n\
+50 goto 20\n\
+60 let c = 108\n\
+70 end\n";
+
 static const char program_loop[] =
 "10 for i = 0 to 126\n\
 20 for j = 0 to 126\n\
 30 for k = 0 to 10\n\
 40 let a = i * j * k\n\
+rem 45 print a, i, j, k\n\
 50 next k\n\
 60 next j\n\
 70 next i\n\
@@ -89,6 +99,9 @@ main(void)
 {
   run(program_let);
   assert(ubasic_get_variable(0) == 42);
+
+  run(program_goto);
+  assert(ubasic_get_variable(2) == 108);
 
   run(program_loop);
   assert(ubasic_get_variable(0) == (VARIABLE_TYPE)(126 * 126 * 10));

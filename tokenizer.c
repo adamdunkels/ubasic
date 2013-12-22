@@ -167,9 +167,16 @@ get_next_token(void)
 }
 /*---------------------------------------------------------------------------*/
 void
-tokenizer_init(const char *program)
+tokenizer_goto(const char *program)
 {
   ptr = program;
+  current_token = get_next_token();
+}
+/*---------------------------------------------------------------------------*/
+void
+tokenizer_init(const char *program)
+{
+  tokenizer_goto(program);
   current_token = get_next_token();
 }
 /*---------------------------------------------------------------------------*/
@@ -254,3 +261,8 @@ tokenizer_variable_num(void)
   return *ptr - 'a';
 }
 /*---------------------------------------------------------------------------*/
+char const *
+tokenizer_pos(void)
+{
+    return ptr;
+}
