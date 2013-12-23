@@ -76,6 +76,10 @@ static VARIABLE_TYPE expr(void);
 static void line_statement(void);
 static void statement(void);
 static void index_free(void);
+
+peek_func peek_function = NULL;
+poke_func poke_function = NULL;
+
 /*---------------------------------------------------------------------------*/
 void
 ubasic_init(const char *program)
@@ -83,6 +87,18 @@ ubasic_init(const char *program)
   program_ptr = program;
   for_stack_ptr = gosub_stack_ptr = 0;
   index_free();
+  tokenizer_init(program);
+  ended = 0;
+}
+/*---------------------------------------------------------------------------*/
+void
+ubasic_init_peek_poke(const char *program, peek_func peek, poke_func poke)
+{
+  program_ptr = program;
+  for_stack_ptr = gosub_stack_ptr = 0;
+  index_free();
+  peek_function = peek;
+  poke_function = poke;
   tokenizer_init(program);
   ended = 0;
 }
@@ -492,6 +508,37 @@ for_statement(void)
 }
 /*---------------------------------------------------------------------------*/
 static void
+peek_statement(void)
+{
+  VARIABLE_TYPE peek_addr;
+  int var;
+
+  accept(TOKENIZER_PEEK);
+  peek_addr = expr();
+  accept(TOKENIZER_COMMA);
+  var = tokenizer_variable_num();
+  accept(TOKENIZER_VARIABLE);
+  accept(TOKENIZER_CR);
+
+  ubasic_set_variable(var, peek_function(peek_addr));
+}
+/*---------------------------------------------------------------------------*/
+static void
+poke_statement(void)
+{
+  VARIABLE_TYPE poke_addr;
+  VARIABLE_TYPE value;
+
+  accept(TOKENIZER_POKE);
+  poke_addr = expr();
+  accept(TOKENIZER_COMMA);
+  value = expr();
+  accept(TOKENIZER_CR);
+
+  poke_function(poke_addr, value);
+}
+/*---------------------------------------------------------------------------*/
+static void
 end_statement(void)
 {
   accept(TOKENIZER_END);
@@ -523,6 +570,12 @@ statement(void)
     break;
   case TOKENIZER_FOR:
     for_statement();
+    break;
+  case TOKENIZER_PEEK:
+    peek_statement();
+    break;
+  case TOKENIZER_POKE:
+    poke_statement();
     break;
   case TOKENIZER_NEXT:
     next_statement();

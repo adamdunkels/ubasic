@@ -68,6 +68,22 @@ rem 120 print a, b\n\
 140 next i\n\
 160 end\n";
 
+static const char program_peek_poke[] =
+"10 peek 100 + 20 + 3, a\n\
+20 peek 123, z\n\
+30 poke 100 - 1, 99\n\
+40 poke 0, 0\n\
+50 end\n";
+
+/*---------------------------------------------------------------------------*/
+VARIABLE_TYPE peek(VARIABLE_TYPE arg) {
+    return arg;
+}
+
+/*---------------------------------------------------------------------------*/
+void poke(VARIABLE_TYPE arg, VARIABLE_TYPE value) {
+    assert(arg == value);
+}
 
 /*---------------------------------------------------------------------------*/
 void run(const char program[]) {
@@ -81,7 +97,7 @@ void run(const char program[]) {
 
   start_t = clock();
 
-  ubasic_init(program);
+  ubasic_init_peek_poke(program, &peek, &poke);
 
   do {
     ubasic_run();
@@ -108,6 +124,10 @@ main(void)
 
   run(program_fibs);
   assert(ubasic_get_variable(1) == 89);
+
+  run(program_peek_poke);
+  assert(ubasic_get_variable(0) == 123);
+  assert(ubasic_get_variable(25) == 123);
 
   return 0;
 }

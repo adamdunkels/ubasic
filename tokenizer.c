@@ -66,6 +66,8 @@ static const struct keyword_token keywords[] = {
   {"return", TOKENIZER_RETURN},
   {"call", TOKENIZER_CALL},
   {"rem", TOKENIZER_REM},
+  {"peek", TOKENIZER_PEEK},
+  {"poke", TOKENIZER_POKE},
   {"end", TOKENIZER_END},
   {NULL, TOKENIZER_ERROR}
 };
@@ -96,6 +98,8 @@ singlechar(void)
     return TOKENIZER_MOD;
   } else if(*ptr == '(') {
     return TOKENIZER_LEFTPAREN;
+  } else if(*ptr == '#') {
+    return TOKENIZER_HASH;
   } else if(*ptr == ')') {
     return TOKENIZER_RIGHTPAREN;
   } else if(*ptr == '<') {
