@@ -30,6 +30,8 @@
 #ifndef __TOKENIZER_H__
 #define __TOKENIZER_H__
 
+#include "vartype.h"
+
 enum {
   TOKENIZER_ERROR,
   TOKENIZER_ENDOFINPUT,
@@ -48,6 +50,9 @@ enum {
   TOKENIZER_GOSUB,
   TOKENIZER_RETURN,
   TOKENIZER_CALL,
+  TOKENIZER_REM,
+  TOKENIZER_PEEK,
+  TOKENIZER_POKE,
   TOKENIZER_END,
   TOKENIZER_COMMA,
   TOKENIZER_SEMICOLON,
@@ -58,6 +63,7 @@ enum {
   TOKENIZER_ASTR,
   TOKENIZER_SLASH,
   TOKENIZER_MOD,
+  TOKENIZER_HASH,
   TOKENIZER_LEFTPAREN,
   TOKENIZER_RIGHTPAREN,
   TOKENIZER_LT,
@@ -66,14 +72,17 @@ enum {
   TOKENIZER_CR,
 };
 
+void tokenizer_goto(const char *program);
 void tokenizer_init(const char *program);
 void tokenizer_next(void);
 int tokenizer_token(void);
-int tokenizer_num(void);
+VARIABLE_TYPE tokenizer_num(void);
 int tokenizer_variable_num(void);
 void tokenizer_string(char *dest, int len);
 
 int tokenizer_finished(void);
 void tokenizer_error_print(void);
+
+char const *tokenizer_pos(void);
 
 #endif /* __TOKENIZER_H__ */

@@ -43,7 +43,7 @@
 
 static char const *ptr, *nextptr;
 
-#define MAX_NUMLEN 5
+#define MAX_NUMLEN 6
 
 struct keyword_token {
   char *keyword;
@@ -65,6 +65,9 @@ static const struct keyword_token keywords[] = {
   {"gosub", TOKENIZER_GOSUB},
   {"return", TOKENIZER_RETURN},
   {"call", TOKENIZER_CALL},
+  {"rem", TOKENIZER_REM},
+  {"peek", TOKENIZER_PEEK},
+  {"poke", TOKENIZER_POKE},
   {"end", TOKENIZER_END},
   {NULL, TOKENIZER_ERROR}
 };
@@ -95,6 +98,8 @@ singlechar(void)
     return TOKENIZER_MOD;
   } else if(*ptr == '(') {
     return TOKENIZER_LEFTPAREN;
+  } else if(*ptr == '#') {
+    return TOKENIZER_HASH;
   } else if(*ptr == ')') {
     return TOKENIZER_RIGHTPAREN;
   } else if(*ptr == '<') {
@@ -118,21 +123,21 @@ get_next_token(void)
   if(*ptr == 0) {
     return TOKENIZER_ENDOFINPUT;
   }
-  
+
   if(isdigit(*ptr)) {
     for(i = 0; i < MAX_NUMLEN; ++i) {
       if(!isdigit(ptr[i])) {
-	if(i > 0) {
-	  nextptr = ptr + i;
-	  return TOKENIZER_NUMBER;
-	} else {
-	  DEBUG_PRINTF("get_next_token: error due to too short number\n");
-	  return TOKENIZER_ERROR;
-	}
+        if(i > 0) {
+          nextptr = ptr + i;
+          return TOKENIZER_NUMBER;
+        } else {
+          DEBUG_PRINTF("get_next_token: error due to too short number\n");
+          return TOKENIZER_ERROR;
+        }
       }
       if(!isdigit(ptr[i])) {
-	DEBUG_PRINTF("get_next_token: error due to malformed number\n");
-	return TOKENIZER_ERROR;
+        DEBUG_PRINTF("get_next_token: error due to malformed number\n");
+        return TOKENIZER_ERROR;
       }
     }
     DEBUG_PRINTF("get_next_token: error due to too long number\n");
@@ -150,8 +155,8 @@ get_next_token(void)
   } else {
     for(kt = keywords; kt->keyword != NULL; ++kt) {
       if(strncmp(ptr, kt->keyword, strlen(kt->keyword)) == 0) {
-	nextptr = ptr + strlen(kt->keyword);
-	return kt->token;
+        nextptr = ptr + strlen(kt->keyword);
+        return kt->token;
       }
     }
   }
@@ -161,14 +166,21 @@ get_next_token(void)
     return TOKENIZER_VARIABLE;
   }
 
-  
+
   return TOKENIZER_ERROR;
+}
+/*---------------------------------------------------------------------------*/
+void
+tokenizer_goto(const char *program)
+{
+  ptr = program;
+  current_token = get_next_token();
 }
 /*---------------------------------------------------------------------------*/
 void
 tokenizer_init(const char *program)
 {
-  ptr = program;
+  tokenizer_goto(program);
   current_token = get_next_token();
 }
 /*---------------------------------------------------------------------------*/
@@ -188,15 +200,27 @@ tokenizer_next(void)
 
   DEBUG_PRINTF("tokenizer_next: %p\n", nextptr);
   ptr = nextptr;
+
   while(*ptr == ' ') {
     ++ptr;
   }
   current_token = get_next_token();
+
+  if(current_token == TOKENIZER_REM) {
+      while(!(*nextptr == '\n' || tokenizer_finished())) {
+        ++nextptr;
+      }
+      if(*nextptr == '\n') {
+        ++nextptr;
+      }
+      tokenizer_next();
+  }
+
   DEBUG_PRINTF("tokenizer_next: '%s' %d\n", ptr, current_token);
   return;
 }
 /*---------------------------------------------------------------------------*/
-int
+VARIABLE_TYPE
 tokenizer_num(void)
 {
   return atoi(ptr);
@@ -207,7 +231,7 @@ tokenizer_string(char *dest, int len)
 {
   char *string_end;
   int string_len;
-  
+
   if(tokenizer_token() != TOKENIZER_STRING) {
     return;
   }
@@ -241,3 +265,8 @@ tokenizer_variable_num(void)
   return *ptr - 'a';
 }
 /*---------------------------------------------------------------------------*/
+char const *
+tokenizer_pos(void)
+{
+    return ptr;
+}
