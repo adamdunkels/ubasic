@@ -251,7 +251,7 @@ relation(void)
 /*---------------------------------------------------------------------------*/
 static void
 index_free(void) {
-  if (line_index_head != NULL) {
+  if(line_index_head != NULL) {
     line_index_current = line_index_head;
     do {
       DEBUG_PRINTF("Freeing index for line %d.\n", line_index_current);
@@ -276,7 +276,7 @@ index_find(int linenum) {
     lidx = lidx->next;
 
     #if DEBUG
-    if (lidx != NULL) {
+    if(lidx != NULL) {
       DEBUG_PRINTF("index_find: Step %3d. Found index for line %d: %d.\n",
                    step, lidx->line_number,
                    lidx->program_text_position);
@@ -284,7 +284,7 @@ index_find(int linenum) {
     step++;
     #endif
   }
-  if (lidx != NULL && lidx->line_number == linenum) {
+  if(lidx != NULL && lidx->line_number == linenum) {
     DEBUG_PRINTF("index_find: Returning index for line %d.\n", linenum);
     return lidx->program_text_position;
   }
@@ -294,7 +294,7 @@ index_find(int linenum) {
 /*---------------------------------------------------------------------------*/
 static void
 index_add(int linenum, char const* sourcepos) {
-  if (line_index_head != NULL && index_find(linenum)) {
+  if(line_index_head != NULL && index_find(linenum)) {
     return;
   }
 
@@ -305,7 +305,7 @@ index_add(int linenum, char const* sourcepos) {
   new_lidx->program_text_position = sourcepos;
   new_lidx->next = NULL;
 
-  if (line_index_head != NULL) {
+  if(line_index_head != NULL) {
     line_index_current->next = new_lidx;
     line_index_current = line_index_current->next;
   } else {
@@ -338,7 +338,7 @@ static void
 jump_linenum(int linenum)
 {
   char const* pos = index_find(linenum);
-  if (pos != NULL) {
+  if(pos != NULL) {
     DEBUG_PRINTF("jump_linenum: Going to line %d.\n", linenum);
     tokenizer_goto(pos);
   } else {

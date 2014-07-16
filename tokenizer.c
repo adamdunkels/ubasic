@@ -206,11 +206,11 @@ tokenizer_next(void)
   }
   current_token = get_next_token();
 
-  if (current_token == TOKENIZER_REM) {
+  if(current_token == TOKENIZER_REM) {
       while(!(*nextptr == '\n' || tokenizer_finished())) {
         ++nextptr;
       }
-      if (*nextptr == '\n') {
+      if(*nextptr == '\n') {
         ++nextptr;
       }
       tokenizer_next();
