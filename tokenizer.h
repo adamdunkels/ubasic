@@ -70,6 +70,7 @@ enum {
   TOKENIZER_GT,
   TOKENIZER_EQ,
   TOKENIZER_CR,
+  TOKENIZER_LF,
 };
 
 void tokenizer_goto(const char *program);
