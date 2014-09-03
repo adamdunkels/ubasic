@@ -78,6 +78,8 @@ singlechar(void)
 {
   if(*ptr == '\n') {
     return TOKENIZER_CR;
+  } else if(*ptr == '\r'){
+    return TOKENIZER_LF;
   } else if(*ptr == ',') {
     return TOKENIZER_COMMA;
   } else if(*ptr == ';') {
